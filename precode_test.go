@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -18,7 +19,10 @@ func TestMainHandlerWhenOk(t *testing.T) {
 	handler.ServeHTTP(responseRecorder, req)
 
 	status := responseRecorder.Code
-	assert.Equal(t, http.StatusOK, status)
+	require.Equal(t, http.StatusOK, status)
+
+	_, err := io.ReadAll(responseRecorder.Body)
+	require.NoError(t, err)
 }
 
 func TestMainHandlerWhenMissingCount(t *testing.T) {
@@ -29,7 +33,7 @@ func TestMainHandlerWhenMissingCount(t *testing.T) {
 	handler.ServeHTTP(responseRecorder, req)
 
 	status := responseRecorder.Code
-	assert.Equal(t, http.StatusBadRequest, status)
+	require.Equal(t, http.StatusBadRequest, status)
 
 	expected := `count missing`
 	assert.Equal(t, expected, responseRecorder.Body.String())
